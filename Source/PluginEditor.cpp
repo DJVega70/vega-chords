@@ -221,7 +221,10 @@ public:
         btn (loadBtn, "LOAD", [this] { loadPreset(); });
         btn (saveBtn, "SAVE", [this] { savePreset(); });
         a.addParameterListener ("key", &listener); a.addParameterListener ("scale", &listener); a.addParameterListener ("extension", &listener);
-        listener.onChange = [this] { juce::MessageManager::callAsync ([sp = juce::Component::SafePointer<Main> (this)] { if (sp) sp->afterChange(); }); };
+        {
+            juce::Component::SafePointer<Main> safe (this);
+            listener.onChange = [safe] { juce::MessageManager::callAsync ([safe] { if (safe != nullptr) safe->afterChange(); }); };
+        }
         updateSuggestions();
     }
     ~Main() override { a.removeParameterListener ("key", &listener); a.removeParameterListener ("scale", &listener); a.removeParameterListener ("extension", &listener); }
